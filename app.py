@@ -965,12 +965,12 @@ def api_notifications():
             'active_orders': orders_data
         })
     return jsonify({'role': 'none'})
-
 # --- DATABASE INITIALIZATION ---
 with app.app_context():
     db.create_all()
-    @app.route('/setup-db')
-    def setup_db():
+
+@app.route('/setup-db')
+def setup_db():
     with app.app_context():
         db.create_all()
     return 'Database tables created successfully!'
@@ -981,5 +981,4 @@ if __name__ == '__main__':
         host='0.0.0.0',
         port=int(os.environ.get('PORT', 5000))
     )
-
 
