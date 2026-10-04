@@ -1,3 +1,4 @@
+```html
 {% extends "base.html" %}
 
 {% block title %}Student Registration{% endblock %}
@@ -5,93 +6,212 @@
 {% block content %}
 <div style="max-width: 600px; margin: 2rem auto; width: 100%;">
     <div class="glass-card">
-        <h2 style="text-align: center; margin-bottom: 0.5rem; font-size: 2rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Student Registration</h2>
-        <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Create your student account. Once approved by the admin, you can log in and start ordering.</p>
-        
-        <form method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data" id="register-form" autocomplete="off">
+        <h2 style="text-align: center; margin-bottom: 0.5rem; font-size: 2rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Student Registration
+        </h2>
+
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">
+            Create your student account. Once approved by the admin, you can log in and start ordering.
+        </p>
+
+        <form method="POST"
+              action="{{ url_for('register') }}"
+              enctype="multipart/form-data"
+              id="register-form"
+              autocomplete="off">
+
+            <!-- Full Name -->
             <div class="form-group">
-                <label for="name"><i class="fa-solid fa-address-card"></i> Full Name</label>
-                <input type="text" id="name" name="name" required placeholder="e.g. Arun Kumar" autocomplete="off">
+                <label for="name">
+                    <i class="fa-solid fa-address-card"></i> Full Name
+                </label>
+                <input type="text"
+                       id="name"
+                       name="name"
+                       required
+                       placeholder="e.g. Arun Kumar"
+                       autocomplete="off">
             </div>
-            
+
+            <!-- Username -->
             <div class="form-group">
-                <label for="username"><i class="fa-solid fa-user"></i> Roll Number / Username</label>
-                <input type="text" id="username" name="username" required pattern="[Bb]\d{5}" maxlength="6" minlength="6" placeholder="e.g. B10001" title="Must start with B followed by 5 numbers (e.g. B10001)" autocomplete="off">
-                <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 0.2rem;">Must start with B followed by 5 numbers (e.g. B10001)</small>
+                <label for="username">
+                    <i class="fa-solid fa-user"></i> Roll Number / Username
+                </label>
+
+                <input type="text"
+                       id="username"
+                       name="username"
+                       required
+                       pattern="[Bb]\d{5}"
+                       maxlength="6"
+                       minlength="6"
+                       placeholder="e.g. B10001"
+                       title="Must start with B followed by 5 numbers (e.g. B10001)"
+                       autocomplete="off">
+
+                <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 0.2rem;">
+                    Must start with B followed by 5 numbers (e.g. B10001)
+                </small>
             </div>
-            
+
+            <!-- Password -->
             <div class="form-group">
-                <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
-                <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="new-password">
+                <label for="password">
+                    <i class="fa-solid fa-lock"></i> Password
+                </label>
+
+                <input type="password"
+                       id="password"
+                       name="password"
+                       required
+                       placeholder="••••••••"
+                       autocomplete="new-password">
             </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group">
-                    <label for="year"><i class="fa-solid fa-graduation-cap"></i> Course Level</label>
-                    <select id="year" name="year" required>
-                        <option value="" disabled selected>Select Level</option>
-                        <option value="UG">UG</option>
-                        <option value="PG">PG</option>
-                        <option value="PhD">PhD</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="department"><i class="fa-solid fa-graduation-cap"></i> Department</label>
-                    <select id="department" name="department" required>
-                        <option value="" disabled selected>Select Level First</option>
-                    </select>
-                </div>
+
+            <!-- Course Level -->
+            <div class="form-group">
+                <label for="course_level">
+                    <i class="fa-solid fa-graduation-cap"></i> Course Level
+                </label>
+
+                <select id="course_level" name="course_level" required>
+                    <option value="" disabled selected>Select Level</option>
+                    <option value="UG">UG</option>
+                    <option value="PG">PG</option>
+                    <option value="PhD">PhD</option>
+                </select>
             </div>
-            
+
+            <!-- Department -->
+            <div class="form-group">
+                <label for="department">
+                    <i class="fa-solid fa-building-columns"></i> Department
+                </label>
+
+                <select id="department" name="department" required>
+                    <option value="" disabled selected>Select Level First</option>
+                </select>
+            </div>
+
+            <!-- Year -->
+            <div class="form-group">
+                <label for="year">
+                    <i class="fa-solid fa-calendar"></i> Year
+                </label>
+
+                <select id="year" name="year" required>
+                    <option value="" disabled selected>Select Year</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </div>
+
+            <!-- Student Selfie -->
             <div class="form-group" style="margin-top: 1rem;">
-                <label><i class="fa-solid fa-camera"></i> Student Photo / Selfie</label>
-                
-                <!-- Toggle Mode selection -->
+                <label>
+                    <i class="fa-solid fa-camera"></i> Student Photo / Selfie
+                </label>
+
+                <!-- Camera / Upload buttons -->
                 <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                    <button type="button" id="btn-mode-camera" class="btn btn-secondary" style="flex: 1; font-size: 0.9rem;">
+
+                    <button type="button"
+                            id="btn-mode-camera"
+                            class="btn btn-secondary"
+                            style="flex: 1; font-size: 0.9rem;">
                         <i class="fa-solid fa-webcam"></i> Use Camera
                     </button>
-                    <button type="button" id="btn-mode-upload" class="btn btn-primary" style="flex: 1; font-size: 0.9rem;">
+
+                    <button type="button"
+                            id="btn-mode-upload"
+                            class="btn btn-primary"
+                            style="flex: 1; font-size: 0.9rem;">
                         <i class="fa-solid fa-upload"></i> Upload File
                     </button>
+
                 </div>
-                
-                <!-- File Input Mode (Active by default) -->
+
+                <!-- Upload File -->
                 <div id="file-upload-section">
-                    <input type="file" id="selfie-file" name="selfie" accept="image/*">
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Upload a clear selfie showing your face.</p>
+
+                    <input type="file"
+                           id="selfie-file"
+                           name="selfie"
+                           accept="image/*">
+
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                        Upload a clear selfie showing your face.
+                    </p>
+
                 </div>
-                
-                <!-- Camera Capture Mode (Hidden by default) -->
-                <div id="camera-section" style="display: none; flex-direction: column; align-items: center; gap: 1rem;">
-                    <video id="camera-preview" autoplay playsinline></video>
-                    <canvas id="selfie-canvas" width="640" height="480"></canvas>
+
+                <!-- Camera -->
+                <div id="camera-section"
+                     style="display: none; flex-direction: column; align-items: center; gap: 1rem;">
+
+                    <video id="camera-preview"
+                           autoplay
+                           playsinline>
+                    </video>
+
+                    <canvas id="selfie-canvas"
+                            width="640"
+                            height="480">
+                    </canvas>
+
                     <div style="display: flex; gap: 1rem; width: 100%;">
-                        <button type="button" id="btn-start-camera" class="btn btn-secondary" style="flex: 1;">
+
+                        <button type="button"
+                                id="btn-start-camera"
+                                class="btn btn-secondary"
+                                style="flex: 1;">
                             <i class="fa-solid fa-power-off"></i> Start Camera
                         </button>
-                        <button type="button" id="btn-capture" class="btn btn-success" style="flex: 1; display: none;">
+
+                        <button type="button"
+                                id="btn-capture"
+                                class="btn btn-success"
+                                style="flex: 1; display: none;">
                             <i class="fa-solid fa-camera-retro"></i> Capture Selfie
                         </button>
+
                     </div>
-                    <!-- Hidden input to hold captured image base64 data -->
-                    <input type="hidden" id="selfie-base64" name="selfie_base64">
+
+                    <!-- Captured image -->
+                    <input type="hidden"
+                           id="selfie-base64"
+                           name="selfie_base64">
+
                 </div>
-                
+
+                <!-- Preview -->
                 <div style="display: flex; justify-content: center; margin-top: 1rem;">
-                    <img id="captured-image-preview" alt="Selfie Preview">
+                    <img id="captured-image-preview"
+                         alt="Selfie Preview">
                 </div>
+
             </div>
-            
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; padding: 0.9rem;">
-                Submit Registration <i class="fa-solid fa-paper-plane"></i>
+
+            <!-- Submit -->
+            <button type="submit"
+                    class="btn btn-primary"
+                    style="width: 100%; margin-top: 1.5rem; padding: 0.9rem;">
+                Submit Registration
+                <i class="fa-solid fa-paper-plane"></i>
             </button>
+
         </form>
-        
+
         <div style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: var(--text-muted);">
-            Already registered? <a href="{{ url_for('login') }}" style="color: var(--primary); font-weight: 600;">Sign in here</a>
+            Already registered?
+            <a href="{{ url_for('login') }}"
+               style="color: var(--primary); font-weight: 600;">
+                Sign in here
+            </a>
         </div>
+
     </div>
 </div>
 {% endblock %}
@@ -100,101 +220,190 @@
 <script>
     const btnModeCamera = document.getElementById('btn-mode-camera');
     const btnModeUpload = document.getElementById('btn-mode-upload');
+
     const fileUploadSection = document.getElementById('file-upload-section');
     const cameraSection = document.getElementById('camera-section');
-    
+
     const video = document.getElementById('camera-preview');
     const canvas = document.getElementById('selfie-canvas');
+
     const selfieFile = document.getElementById('selfie-file');
     const selfieBase64 = document.getElementById('selfie-base64');
+
     const capturedPreview = document.getElementById('captured-image-preview');
-    
+
     const btnStartCamera = document.getElementById('btn-start-camera');
     const btnCapture = document.getElementById('btn-capture');
-    
+
     let stream = null;
-    
-    // Switch to Upload File Mode
+
+
+    // =========================
+    // Upload File Mode
+    // =========================
+
     btnModeUpload.addEventListener('click', () => {
+
         btnModeUpload.classList.add('btn-primary');
         btnModeUpload.classList.remove('btn-secondary');
+
         btnModeCamera.classList.add('btn-secondary');
         btnModeCamera.classList.remove('btn-primary');
-        
+
         fileUploadSection.style.display = 'block';
         cameraSection.style.display = 'none';
+
         selfieFile.required = true;
+
         selfieBase64.value = '';
+
+        capturedPreview.src = '';
+        capturedPreview.style.display = 'none';
+
         stopCamera();
     });
-    
-    // Switch to Camera Mode
+
+
+    // =========================
+    // Camera Mode
+    // =========================
+
     btnModeCamera.addEventListener('click', () => {
+
         btnModeCamera.classList.add('btn-primary');
         btnModeCamera.classList.remove('btn-secondary');
+
         btnModeUpload.classList.add('btn-secondary');
         btnModeUpload.classList.remove('btn-primary');
-        
+
         fileUploadSection.style.display = 'none';
         cameraSection.style.display = 'flex';
+
         selfieFile.required = false;
         selfieFile.value = '';
+
     });
-    
+
+
+    // =========================
+    // Start Camera
+    // =========================
+
     async function startCamera() {
+
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'user'
+                }
+            });
+
             video.srcObject = stream;
+
             video.style.display = 'block';
+
             btnCapture.style.display = 'block';
-            btnStartCamera.innerHTML = '<i class="fa-solid fa-rotate"></i> Restart Camera';
+
+            btnStartCamera.innerHTML =
+                '<i class="fa-solid fa-rotate"></i> Restart Camera';
+
         } catch (err) {
+
             alert('Could not access camera. Please upload a file instead.');
+
             console.error(err);
         }
     }
-    
+
+
+    // =========================
+    // Stop Camera
+    // =========================
+
     function stopCamera() {
+
         if (stream) {
+
             stream.getTracks().forEach(track => track.stop());
+
             stream = null;
         }
+
         video.style.display = 'none';
+
         btnCapture.style.display = 'none';
-        btnStartCamera.innerHTML = '<i class="fa-solid fa-power-off"></i> Start Camera';
+
+        btnStartCamera.innerHTML =
+            '<i class="fa-solid fa-power-off"></i> Start Camera';
     }
-    
+
+
     btnStartCamera.addEventListener('click', () => {
+
         if (stream) {
             stopCamera();
         }
+
         startCamera();
+
     });
-    
+
+
+    // =========================
+    // Capture Selfie
+    // =========================
+
     btnCapture.addEventListener('click', () => {
+
         const context = canvas.getContext('2d');
-        // Mirror the capture to match mirrored video
+
         context.translate(canvas.width, 0);
         context.scale(-1, 1);
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        // Reset transform
-        context.setTransform(1, 0, 0, 1, 0, 0);
-        
+
+        context.drawImage(
+            video,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        context.setTransform(
+            1,
+            0,
+            0,
+            1,
+            0,
+            0
+        );
+
         const dataUrl = canvas.toDataURL('image/jpeg');
+
         selfieBase64.value = dataUrl;
+
         capturedPreview.src = dataUrl;
+
         capturedPreview.style.display = 'block';
-        
-        // Stop the camera stream after capture
+
         stopCamera();
+
     });
-    
-    
-    // Dynamic Department options based on Course Level (UG vs PG/PhD)
-    const yearSelect = document.getElementById('year');
-    const deptSelect = document.getElementById('department');
+
+
+    // =========================
+    // Dynamic Department
+    // =========================
+
+    const courseLevelSelect =
+        document.getElementById('course_level');
+
+    const deptSelect =
+        document.getElementById('department');
+
 
     const depts = {
+
         'UG': [
             'BCA',
             'BSc.COMPUTER SCIENCE',
@@ -204,42 +413,98 @@
             'BA.ENGLISH',
             'BA.DEFENCE'
         ],
+
         'PG': [
             'MSc.COMPUTER SCIENCE',
             'MA.ENGLISH'
         ],
+
         'PhD': [
             'PhD COMPUTER SCIENCE',
             'PhD ENGLISH'
         ]
+
     };
 
-    yearSelect.addEventListener('change', function() {
+
+    courseLevelSelect.addEventListener('change', function() {
+
         const selectedLevel = this.value;
+
         deptSelect.innerHTML = '';
-        
-        const placeholderOption = document.createElement('option');
-        placeholderOption.value = "";
+
+        const placeholderOption =
+            document.createElement('option');
+
+        placeholderOption.value = '';
+
         placeholderOption.disabled = true;
+
         placeholderOption.selected = true;
-        placeholderOption.textContent = "Select Dept";
+
+        placeholderOption.textContent =
+            'Select Department';
+
         deptSelect.appendChild(placeholderOption);
 
+
         const list = depts[selectedLevel] || [];
+
+
         list.forEach(dept => {
-            const opt = document.createElement('option');
+
+            const opt =
+                document.createElement('option');
+
             opt.value = dept;
+
             opt.textContent = dept;
+
             deptSelect.appendChild(opt);
+
         });
+
     });
 
-    // On form submit, make sure at least one photo option is supplied
-    document.getElementById('register-form').addEventListener('submit', (e) => {
-        if (cameraSection.style.display !== 'none' && !selfieBase64.value) {
-            alert('Please take a selfie first using the camera or switch to Upload mode.');
-            e.preventDefault();
-        }
-    });
+
+    // =========================
+    // Form Submit Validation
+    // =========================
+
+    document.getElementById('register-form')
+        .addEventListener('submit', (e) => {
+
+            const cameraMode =
+                cameraSection.style.display !== 'none';
+
+            const uploadMode =
+                fileUploadSection.style.display !== 'none';
+
+
+            if (cameraMode && !selfieBase64.value) {
+
+                alert(
+                    'Please take a selfie first using the camera or switch to Upload mode.'
+                );
+
+                e.preventDefault();
+
+                return;
+            }
+
+
+            if (uploadMode && !selfieFile.files.length) {
+
+                alert(
+                    'Please upload a selfie or switch to Camera mode.'
+                );
+
+                e.preventDefault();
+
+            }
+
+        });
+
 </script>
 {% endblock %}
+```

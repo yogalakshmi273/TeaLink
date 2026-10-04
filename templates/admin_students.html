@@ -24,23 +24,34 @@
                     <label for="password">Create Password</label>
                     <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="new-password">
                 </div>
-                
                 <div class="form-group">
-                    <label for="year">Course Level</label>
-                    <select id="year" name="year" required>
-                        <option value="" disabled selected>Select Level</option>
-                        <option value="UG">UG</option>
-                        <option value="PG">PG</option>
-                        <option value="PhD">PhD</option>
-                    </select>
-                </div>
+    <label for="course_level">Course Level</label>
+    <select id="course_level" name="course_level" required>
+        <option value="" disabled selected>Select Course Level</option>
+        <option value="UG">UG</option>
+        <option value="PG">PG</option>
+        <option value="PhD">PhD</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="department">Department</label>
+    <select id="department" name="department" required>
+        <option value="" disabled selected>Select Department</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="year">Year</label>
+    <select id="year" name="year" required>
+        <option value="" disabled selected>Select Year</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+    </select>
+</div>
                 
-                <div class="form-group">
-                    <label for="department">Department</label>
-                    <select id="department" name="department" required>
-                        <option value="" disabled selected>Select Level First</option>
-                    </select>
-                </div>
+                
                 
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
                     Create Account <i class="fa-solid fa-user-check"></i>
@@ -117,13 +128,12 @@
             <div class="table-container">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Student</th>
-                            <th>Roll Number</th>
-                            <th>Department</th>
-                            <th>Year</th>
-                            <th>Actions</th>
-                        </tr>
+                        <th>Student</th>
+                        <th>Roll Number</th>
+                        <th>Course Level</th>
+                        <th>Department</th>
+                        <th>Year</th>
+                        <th>Actions</th>
                     </thead>
                     <tbody>
                         {% for student in approved_students %}
@@ -141,6 +151,7 @@
                                     </div>
                                 </td>
                                 <td>{{ student.username }}</td>
+                                <td>{{ student.course_level }}</td>
                                 <td>{{ student.department }}</td>
                                 <td>{{ student.year }}</td>
                                 <td>
@@ -153,7 +164,7 @@
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem 0;">
+                                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem 0;">
                                     No student accounts found.
                                 </td>
                             </tr>
@@ -166,8 +177,8 @@
 </div>
 
 <script>
-    // Dynamic Department options based on Course Level (UG vs PG/PhD)
-    const yearSelect = document.getElementById('year');
+    // Dynamic Department options based on Course Level
+    const courseLevelSelect = document.getElementById('course_level');
     const deptSelect = document.getElementById('department');
 
     const depts = {
@@ -190,18 +201,20 @@
         ]
     };
 
-    yearSelect.addEventListener('change', function() {
+    courseLevelSelect.addEventListener('change', function() {
         const selectedLevel = this.value;
+
         deptSelect.innerHTML = '';
-        
+
         const placeholderOption = document.createElement('option');
         placeholderOption.value = "";
         placeholderOption.disabled = true;
         placeholderOption.selected = true;
-        placeholderOption.textContent = "Select Dept";
+        placeholderOption.textContent = "Select Department";
         deptSelect.appendChild(placeholderOption);
 
         const list = depts[selectedLevel] || [];
+
         list.forEach(dept => {
             const opt = document.createElement('option');
             opt.value = dept;

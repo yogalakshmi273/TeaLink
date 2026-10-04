@@ -15,8 +15,9 @@ class User(UserMixin, db.Model):
     
     # Student specific fields
     name = db.Column(db.String(100), nullable=True)
-    department = db.Column(db.String(100), nullable=True)
+    course_level = db.Column(db.String(20), nullable=True)
     year = db.Column(db.String(50), nullable=True)
+    department = db.Column(db.String(100), nullable=True)
     selfie_path = db.Column(db.String(256), nullable=True)
     status = db.Column(db.String(20), default='approved')  # 'pending', 'approved', 'rejected'
     
