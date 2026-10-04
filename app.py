@@ -302,44 +302,136 @@ def student_first_setup():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-        
+
     if request.method == 'POST':
         name = (request.form.get('name') or '').strip()
         username = (request.form.get('username') or '').strip().upper()
         password = request.form.get('password')
+        course_level = request.form.get('course_level')
         department = request.form.get('department')
         year = request.form.get('year')
-        
-        # Validate student username format: starts with 'B', followed by 5 numbers (e.g. B10001)
+
+        # Validate username
         if not re.match(r'^B\d{5}$', username):
-            flash('Student Roll Number / Username must start with "B" followed by 5 numbers (e.g. B10001).', 'error')
+            flash(
+                'Student Roll Number / Username must start with "B" followed by 5 numbers (e.g. B10001).',
+                'error'
+            )
             return redirect(url_for('register'))
-            
-        # Check if username exists
+
+        # Check existing username
         existing_user = User.query.filter_by(username=username).first()
+
         if existing_user:
             flash('Roll number / Username already exists.', 'error')
             return redirect(url_for('register'))
-            
+
+        # Validate Course Level
+        if course_level not in ['UG', 'PG', 'PhD']:
+            flash('Please select a valid Course Level.', 'error')
+            return redirect(url_for('register'))
+
+        # Validate Year
+        if year not in ['1', '2', '3']:
+            flash('Please select a valid Year.', 'error')
+            return redirect(url_for('register'))
+
+        # Department list
+        departments = {
+            'UG': [
+                'BCA',
+                'BSc.COMPUTER SCIENCE',
+                'B.COM',
+                'BSc.MATHEMATICS',
+                'BBA',
+                'BA.ENGLISH',
+                'BA.DEFENCE'
+            ],
+            'PG': [
+                'MSc.COMPUTER SCIENCE',
+                'MA.ENGLISH'
+            ],
+            'PhD': [
+                'PhD COMPUTER SCIENCE',
+                'PhD ENGLISH'
+            ]
+        }
+
+        # Validate Department
+        if department not in departments.get(course_level, []):
+            flash('Please select a valid Department.', 'error')
+            return redirect(url_for('register'))
+
+        # -----------------------------
+        # Save Selfie
+        # -----------------------------
         selfie_path = None
-            
-        # Create student user with status 'pending'
+
+        # Camera captured image
+        selfie_base64 = request.form.get('selfie_base64')
+
+        if selfie_base64:
+            selfie_path = save_base64_image(selfie_base64)
+
+        # Uploaded image
+        elif 'selfie' in request.files:
+            selfie_file = request.files['selfie']
+
+            if selfie_file and selfie_file.filename != '':
+                if allowed_file(selfie_file.filename):
+                    filename = f"selfie_{uuid.uuid4().hex}_{secure_filename(selfie_file.filename)}"
+                    filepath = os.path.join(
+                        app.config['UPLOAD_FOLDER'],
+                        filename
+                    )
+
+                    os.makedirs(
+                        app.config['UPLOAD_FOLDER'],
+                        exist_ok=True
+                    )
+
+                    selfie_file.save(filepath)
+
+                    selfie_path = os.path.join(
+                        'static',
+                        'uploads',
+                        filename
+                    ).replace('\\', '/')
+                else:
+                    flash('Invalid selfie image format.', 'error')
+                    return redirect(url_for('register'))
+
+        # Selfie required
+        if not selfie_path:
+            flash('Please provide a selfie using Camera or Upload File.', 'error')
+            return redirect(url_for('register'))
+
+        # -----------------------------
+        # Create Student
+        # -----------------------------
         new_student = User(
             username=username,
             name=name,
             role='student',
+            course_level=course_level,
             department=department,
             year=year,
-            
+            selfie_path=selfie_path,
+            status='pending'
         )
+
         new_student.set_password(password)
-        
+
         db.session.add(new_student)
         db.session.commit()
-        
-        flash('Registration submitted successfully! Please wait for Admin approval before logging in.', 'success')
+
+        flash(
+            'Registration submitted successfully! Please wait for Admin approval before logging in.',
+            'success'
+        )
+
         return redirect(url_for('login'))
-        
+
     return render_template('register.html')
 
 @app.route('/logout')
@@ -462,11 +554,19 @@ def admin_approve_student(student_id, action):
 @app.route('/admin/students/add', methods=['POST'])
 @role_required('admin')
 def admin_add_student():
+
     name = (request.form.get('name') or '').strip()
+
     username = (request.form.get('username') or '').strip().upper()
+
     password = request.form.get('password')
+
+    course_level = request.form.get('course_level')
+
     department = request.form.get('department')
+
     year = request.form.get('year')
+
     
     # Validate student username format: starts with 'B', followed by 5 numbers (e.g. B10001)
     if not re.match(r'^B\d{5}$', username):
@@ -480,13 +580,14 @@ def admin_add_student():
         return redirect(url_for('admin_students'))
         
     student = User(
-        name=name,
-        username=username,
-        role='student',
-        department=department,
-        year=year,
-        status='approved'
-    )
+    name=name,
+    username=username,
+    role='student',
+    course_level=course_level,
+    department=department,
+    year=year,
+    status='approved'
+)
     student.set_password(password)
     db.session.add(student)
     db.session.commit()
