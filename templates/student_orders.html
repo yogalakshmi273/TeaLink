@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Track Orders{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="max-width: 800px; margin: 0 auto; width: 100%;">
+    <div style="margin-bottom: 2rem;">
+        <h1 style="background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Your Orders</h1>
+        <p style="color: var(--text-muted);">Track your active orders or view your order history</p>
+    </div>
+    
+    <!-- Active Orders Section -->
+    <div style="margin-bottom: 3rem;">
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-spinner fa-spin" style="color: var(--primary);"></i> Active Orders
+        </h3>
+        
+        {% for order in active_orders %}
+            <div class="glass-card" style="margin-bottom: 2rem; position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">Order Number</span>
+                        <h4 style="margin: 0; color: var(--text-main);">{{ order.order_number }}</h4>
+                    </div>
+                    {% if order.delivery_time %}
+                    <div>
+                        <span style="font-size: 0.85rem; color: var(--warning);"><i class="fa-solid fa-clock"></i> Delivery Time</span>
+                        <h4 style="margin: 0; color: var(--warning);">{{ order.delivery_time|time_12hr }}</h4>
+                    </div>
+                    {% endif %}
+                    <div style="text-align: right;">
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">Amount Paid</span>
+                        <h4 style="margin: 0; color: var(--accent);">₹{{ "%.2f"|format(order.total_price) }}</h4>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <strong style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Order Details:</strong>
+                    <ul style="list-style: none;">
+                        {% for item in order.items %}
+                            <li>{{ item.quantity }}x {{ item.product_name }} - ₹{{ "%.2f"|format(item.price * item.quantity) }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+                {% if order.status == 'Rejected' %}
+                    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-sm); padding: 1.5rem; color: #fca5a5; display: flex; align-items: flex-start; gap: 1rem;">
+                        <i class="fa-solid fa-circle-xmark" style="font-size: 2rem; color: var(--danger); margin-top: 0.1rem;"></i>
+                        <div>
+                            <h4 style="margin: 0 0 0.5rem; color: #ef4444;">Order Rejected</h4>
+                            <p style="margin: 0; font-size: 0.95rem;">Reason: <strong>{{ order.rejection_notes or 'Order could not be fulfilled.' }}</strong></p>
+                            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--text-muted);">Please contact restaurant administration or place a new order.</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Tracker Steps -->
+                    {% set status_step = 1 %}
+                    {% if order.status == 'Accepted' %}
+                        {% set status_step = 2 %}
+                    {% elif order.status == 'Preparing' %}
+                        {% set status_step = 3 %}
+                    {% elif order.status == 'Ready' %}
+                        {% set status_step = 4 %}
+                    {% elif order.status == 'Completed' %}
+                        {% set status_step = 5 %}
+                    {% endif %}
+                    
+                    <div class="tracker-steps">
+                        <!-- Progress Bar line -->
+                        {% set pct = (status_step - 1) * 25 %}
+                        <div class="tracker-progress-bar" style="width: {{ pct }}%;"></div>
+                        
+                        <div class="tracker-step {% if status_step >= 1 %}completed{% endif %}">
+                            <i class="fa-solid fa-file-invoice"></i>
+                            <span class="tracker-label">Ordered</span>
+                        </div>
+                        
+                        <div class="tracker-step {% if status_step > 2 %}completed{% elif status_step == 2 %}active{% endif %}">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span class="tracker-label">Accepted</span>
+                        </div>
+                        
+                        <div class="tracker-step {% if status_step > 3 %}completed{% elif status_step == 3 %}active{% endif %}">
+                            <i class="fa-solid fa-fire-burner"></i>
+                            <span class="tracker-label">Preparing</span>
+                        </div>
+                        
+                        <div class="tracker-step {% if status_step > 4 %}completed{% elif status_step == 4 %}active{% endif %}">
+                            <i class="fa-solid fa-bell"></i>
+                            <span class="tracker-label">Ready</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 3rem; text-align: center; background: rgba(255,255,255,0.03); padding: 0.8rem; border-radius: 8px; font-size: 0.9rem;">
+                        {% if order.status == 'Ordered' %}
+                            <i class="fa-solid fa-circle-info" style="color: var(--primary);"></i> Order submitted. Waiting for restaurant confirmation.
+                        {% elif order.status == 'Accepted' %}
+                            <i class="fa-solid fa-circle-info" style="color: var(--primary);"></i> Restaurant confirmed! Preparing to start cooking.
+                        {% elif order.status == 'Preparing' %}
+                            <i class="fa-solid fa-fire-burner" style="color: var(--warning);"></i> Chef is preparing your delicious meal!
+                        {% elif order.status == 'Ready' %}
+                            <i class="fa-solid fa-circle-check" style="color: var(--success);"></i> <strong>Order is READY!</strong> Please collect it from the counter.
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="glass-card" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                <i class="fa-solid fa-receipt" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.3; display: block;"></i>
+                No active orders right now. Go to the menu to place an order.
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Order History Section -->
+    <div>
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-clock-rotate-left" style="color: var(--text-muted);"></i> Order History
+        </h3>
+        
+        <div class="glass-card">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Delivery Time</th>
+                            <th>Price Paid</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in order_history %}
+                            <tr>
+                                <td><strong>{{ order.order_number }}</strong></td>
+                                <td style="font-size: 0.85rem; color: var(--text-muted);">{{ order.created_at|datetime_12hr }}</td>
+                                <td>
+                                    <ul style="list-style: none; font-size: 0.9rem;">
+                                        {% for item in order.items %}
+                                            <li>{{ item.quantity }}x {{ item.product_name }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                                <td style="font-size: 0.9rem; font-weight: 600; color: var(--warning);">
+                                    <i class="fa-solid fa-clock"></i> {{ order.delivery_time|time_12hr or 'Immediate' }}
+                                </td>
+                                <td style="font-weight: 700; color: var(--accent);">₹{{ "%.2f"|format(order.total_price) }}</td>
+                                <td>
+                                    <span class="badge badge-completed">Completed</span>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem 0;">
+                                    No completed orders found.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Refresh page every 15 seconds to track active order updates live
+    setTimeout(function(){
+       window.location.reload();
+    }, 15000);
+</script>
+{% endblock %}

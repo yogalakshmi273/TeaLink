@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}DBCY Campus Teatime Menu{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                <i class="fa-solid fa-mug-saucer"></i> DBCY Campus Teatime
+            </h1>
+            <p style="color: var(--text-muted);">Fresh tea, brewed coffee, hot snacks & bakery items served directly at Don Bosco College Yercaud campus.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('student_change_password') }}" class="btn btn-secondary" style="font-size: 0.85rem;">
+                <i class="fa-solid fa-key"></i> Change Password
+            </a>
+        </div>
+    </div>
+
+
+    
+    <!-- Category Filter Bar -->
+    <div style="display: flex; gap: 0.8rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem;">
+        <a href="{{ url_for('student_shop') }}" class="btn {% if current_category == 'All' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-radius: 9999px; padding: 0.5rem 1.2rem;">
+            All Teatime Menu
+        </a>
+        <a href="{{ url_for('student_shop', category='HOT DRINKS') }}" class="btn {% if current_category == 'HOT DRINKS' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-radius: 9999px; padding: 0.5rem 1.2rem;">
+            Hot Drinks
+        </a>
+        <a href="{{ url_for('student_shop', category='COLD DRINKS') }}" class="btn {% if current_category == 'COLD DRINKS' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-radius: 9999px; padding: 0.5rem 1.2rem;">
+            Cold Drinks
+        </a>
+        <a href="{{ url_for('student_shop', category='SNACKS') }}" class="btn {% if current_category == 'SNACKS' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-radius: 9999px; padding: 0.5rem 1.2rem;">
+            Snacks
+        </a>
+        <a href="{{ url_for('student_shop', category='LUNCH&DINNER') }}" class="btn {% if current_category == 'BAKERY' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-radius: 9999px; padding: 0.5rem 1.2rem;">
+            Lunch & Dinner
+        </a>
+        <a href="{{ url_for('student_shop', category='STATIONERIES') }}" class="btn {% if current_category == 'COMBOS' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-radius: 9999px; padding: 0.5rem 1.2rem;">
+            Stationeries
+        </a>
+    </div>
+
+    <div class="shop-layout">
+        <!-- Products Area -->
+        <div class="shop-main">
+            <div class="products-grid" id="products-grid-container">
+                {% for product in products %}
+                    <div class="product-card" data-name="{{ product.name }}" data-category="{{ product.category }}" data-desc="{{ product.description or '' }}">
+                        {% if product.image_path %}
+                            <img src="{{ url_for('static', filename=product.image_path.split('static/')[-1]) }}" alt="{{ product.name }}" class="product-img">
+                        {% else %}
+                            <div class="product-img" style="display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 2.8rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(245, 158, 11, 0.1));">
+                                {% if 'tea' in product.name.lower() or 'chai' in product.name.lower() %}
+                                    <i class="fa-solid fa-mug-hot"></i>
+                                {% elif 'coffee' in product.name.lower() %}
+                                    <i class="fa-solid fa-mug-saucer"></i>
+                                {% elif 'snack' in product.category.lower() or 'samosa' in product.name.lower() or 'puff' in product.name.lower() %}
+                                    <i class="fa-solid fa-bowl-food"></i>
+                                {% elif 'bakery' in product.category.lower() or 'brownie' in product.name.lower() or 'cookie' in product.name.lower() %}
+                                    <i class="fa-solid fa-cookie"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-utensils"></i>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        <div class="product-info">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <h4 style="margin-bottom: 0.2rem; font-size: 1.1rem; font-weight: 700;">{{ product.name }}</h4>
+                            </div>
+                            <p style="font-size: 0.8rem; color: var(--accent); margin-bottom: 0.4rem; text-transform: uppercase; font-weight: 600;">{{ product.category }}</p>
+                            {% if product.description %}
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.3;">{{ product.description }}</p>
+                            {% endif %}
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 0.8rem; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                                <span class="product-price" style="font-size: 1.25rem; font-weight: 800; color: #fbbf24;">₹{{ "%.2f"|format(product.price) }}</span>
+                                {% if product.available %}
+                                    <button onclick="addToCart({{ product.id }})" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: var(--radius-sm);">
+                                        Add <i class="fa-solid fa-cart-plus"></i>
+                                    </button>
+                                {% else %}
+                                    <span class="badge badge-completed" style="font-size: 0.8rem;">Sold Out</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 4rem 0;">
+                        <i class="fa-solid fa-mug-hot" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.4;"></i>
+                        <p>No DBCY Teatime menu items available in this category.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Cart Drawer/Sidebar -->
+        <div class="cart-sidebar glass-card">
+            <h3 style="border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                <span><i class="fa-solid fa-bag-shopping" style="color: var(--primary);"></i> Your Teatime Order</span>
+                <span id="cart-count-badge" class="badge badge-ordered">{{ cart_items|length }} items</span>
+            </h3>
+            
+            <div class="cart-items" id="cart-items-container">
+                {% for item in cart_items %}
+                    <div class="cart-item" id="cart-item-{{ item.id }}">
+                        <div>
+                            <strong>{{ item.product.name }}</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">₹{{ "%.2f"|format(item.product.price) }} each</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <button onclick="updateQuantity({{ item.id }}, {{ item.quantity - 1 }})" class="btn btn-secondary" style="padding: 0.2rem 0.4rem; font-size: 0.8rem;">-</button>
+                            <span style="font-weight: bold; min-width: 20px; text-align: center;">{{ item.quantity }}</span>
+                            <button onclick="updateQuantity({{ item.id }}, {{ item.quantity + 1 }})" class="btn btn-secondary" style="padding: 0.2rem 0.4rem; font-size: 0.8rem;">+</button>
+                            
+                            <button onclick="removeFromCart({{ item.id }})" style="background: none; border: none; color: var(--danger); margin-left: 0.5rem; cursor: pointer;">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% else %}
+                    <div id="cart-empty-message" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                        <i class="fa-solid fa-cart-shopping" style="font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.3; display: block;"></i>
+                        Your teatime cart is currently empty.
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div style="border-top: 1px solid var(--glass-border); padding-top: 1rem; margin-top: auto;">
+                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem;">
+                    <span>Total Amount:</span>
+                    <span id="cart-total" style="color: var(--accent);">₹{{ "%.2f"|format(cart_total) }}</span>
+                </div>
+                
+                <form id="checkout-form" method="POST" action="{{ url_for('student_checkout') }}">
+                    <div class="form-group" style="margin-bottom: 1.5rem; text-align: left;">
+                        <label for="delivery_time" style="color: var(--text-main); font-weight: 600;"><i class="fa-solid fa-clock"></i> Target Pickup Time</label>
+                        <input type="time" id="delivery_time" name="delivery_time" required style="width: 100%; margin-top: 0.3rem;">
+                        <span id="time-error" style="color: var(--danger); font-size: 0.8rem; display: none; margin-top: 0.3rem;">
+                            <i class="fa-solid fa-circle-exclamation"></i> Please select a future pickup time.
+                        </span>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem; text-align: left;">
+                        <label for="student_notes" style="color: var(--text-main); font-weight: 600;"><i class="fa-solid fa-note-sticky"></i> Special Requests (e.g., Extra hot, Less sugar)</label>
+                        <textarea id="student_notes" name="student_notes" placeholder="e.g., Make chai extra hot, less sugar..." rows="2" style="width: 100%; margin-top: 0.3rem; resize: none; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); color: var(--text-main); font-family: var(--font-family); padding: 0.5rem;"></textarea>
+                    </div>
+                    <button type="submit" id="btn-checkout" class="btn btn-primary" style="width: 100%; padding: 0.9rem; font-weight: bold;" {% if not cart_items %}disabled{% endif %}>
+                        Pay & Generate Token <i class="fa-solid fa-credit-card"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+
+    async function addToCart(productId) {
+        try {
+            const response = await fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ product_id: productId })
+            });
+            if (response.ok) {
+                window.location.reload();
+            }
+        } catch (err) {
+            console.error('Error adding to cart:', err);
+        }
+    }
+    
+    async function updateQuantity(itemId, newQty) {
+        if (newQty <= 0) {
+            removeFromCart(itemId);
+            return;
+        }
+        try {
+            const response = await fetch('/cart/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cart_item_id: itemId, quantity: newQty })
+            });
+            if (response.ok) {
+                window.location.reload();
+            }
+        } catch (err) {
+            console.error('Error updating quantity:', err);
+        }
+    }
+    
+    async function removeFromCart(itemId) {
+        try {
+            const response = await fetch('/cart/remove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cart_item_id: itemId })
+            });
+            if (response.ok) {
+                window.location.reload();
+            }
+        } catch (err) {
+            console.error('Error removing item:', err);
+        }
+    }
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        const timeInput = document.getElementById("delivery_time");
+        if (timeInput) {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 15);
+            
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            timeInput.value = `${hours}:${minutes}`;
+            
+            document.getElementById("checkout-form").addEventListener("submit", (e) => {
+                const selectedTime = timeInput.value;
+                const current = new Date();
+                const [selHours, selMins] = selectedTime.split(':').map(Number);
+                
+                const compareDate = new Date();
+                compareDate.setHours(selHours, selMins, 0, 0);
+                
+                if (compareDate <= current) {
+                    e.preventDefault();
+                    document.getElementById("time-error").style.display = "block";
+                    timeInput.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    document.getElementById("time-error").style.display = "none";
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

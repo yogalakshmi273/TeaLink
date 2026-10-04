@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DBCY CAMPUS TEATIME{% endblock %} - Campus Restaurant POS</title>
+    <!-- Outfit Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <i class="fa-solid fa-bolt"></i> DBCY CAMPUS TEATIME
+            </a>
+            
+            <ul class="nav-links">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'admin' %}
+                        <li><a href="{{ url_for('admin_dashboard') }}" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+                        <li><a href="{{ url_for('admin_products') }}" class="nav-link"><i class="fa-solid fa-mug-hot"></i> Menu</a></li>
+                        <li><a href="{{ url_for('admin_students') }}" class="nav-link"><i class="fa-solid fa-user-graduate"></i> Students</a></li>
+                        <li><a href="{{ url_for('admin_passwords') }}" class="nav-link"><i class="fa-solid fa-key"></i> Passwords & Permissions</a></li>
+                        <li><a href="{{ url_for('admin_orders') }}" class="nav-link"><i class="fa-solid fa-receipt"></i> Orders</a></li>
+                        <li><a href="{{ url_for('admin_reports') }}" class="nav-link"><i class="fa-solid fa-chart-pie"></i> Reports</a></li>
+
+                    {% elif current_user.role == 'student' %}
+                        <li><a href="{{ url_for('student_shop') }}" class="nav-link"><i class="fa-solid fa-store"></i> DBCY Teatime Menu</a></li>
+                        <li><a href="{{ url_for('student_orders') }}" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Track Orders</a></li>
+                        <li><a href="{{ url_for('student_change_password') }}" class="nav-link"><i class="fa-solid fa-key"></i> Change Password</a></li>
+                    {% endif %}
+                    
+                    <li style="margin-left: 1rem; color: var(--text-muted);">
+                        <i class="fa-solid fa-circle-user"></i> {{ current_user.username }} 
+                        <span style="font-size: 0.8rem; text-transform: uppercase; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 4px; margin-left: 0.2rem;">
+                            {{ current_user.role }}
+                        </span>
+                    </li>
+                    <li><a href="{{ url_for('logout') }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}" class="nav-link"><i class="fa-solid fa-right-to-bracket"></i> Login</a></li>
+                    <li><a href="{{ url_for('register') }}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;"><i class="fa-solid fa-user-plus"></i> Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </header>
+
+    <main class="container flex-grow animate-fade-in">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'error' else 'danger' }}">
+                            {% if category == 'success' %}
+                                <i class="fa-solid fa-circle-check"></i>
+                            {% else %}
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            {% endif %}
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer style="margin-top: auto; padding: 2rem; border-top: 1px solid var(--glass-border); text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+        <p>&copy; 2026 DBCY CAMPUS TEATIME POS. Crafted for Campus Dining.</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- Toast Notifications Area -->
+    <div id="toast-container"></div>
+
+    <script>
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+        // Unlock on first click or key press
+        window.addEventListener('click', initAudio, { once: true });
+        window.addEventListener('keydown', initAudio, { once: true });
+
+        function playNotificationSound() {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                
+                // Note 1 (Warm lower tone)
+                const osc1 = audioCtx.createOscillator();
+                const gain1 = audioCtx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                gain1.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35);
+                
+                osc1.connect(gain1);
+                gain1.connect(audioCtx.destination);
+                osc1.start();
+                osc1.stop(audioCtx.currentTime + 0.35);
+                
+                // Note 2 (Bright high pitch, delayed by 100ms)
+                const osc2 = audioCtx.createOscillator();
+                const gain2 = audioCtx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.1); // G5
+                gain2.gain.setValueAtTime(0.08, audioCtx.currentTime + 0.1);
+                gain2.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.45);
+                
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.start(audioCtx.currentTime + 0.1);
+                osc2.stop(audioCtx.currentTime + 0.45);
+            } catch (err) {
+                console.log('AudioContext blocked or failed:', err);
+            }
+        }
+
+        function showToast(title, message, icon = 'fa-bell', color = 'var(--primary)') {
+            // Play notification sound
+            playNotificationSound();
+
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-card';
+            toast.innerHTML = `
+                <i class="fa-solid ${icon}" style="color: ${color}; font-size: 1.4rem; margin-top: 0.2rem;"></i>
+                <div class="toast-card-content">
+                    <div class="toast-card-title">${title}</div>
+                    <div>${message}</div>
+                </div>
+            `;
+            container.appendChild(toast);
+            // Trigger animation
+            toast.offsetHeight;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 400);
+            }, 5000);
+        }
+
+        {% if current_user.is_authenticated %}
+        (function() {
+            let state = {
+                orders: {},
+                adminOrders: {},
+                pendingApprovals: null
+            };
+            let isFirstRun = true;
+
+            async function checkNotifications() {
+                try {
+                    const response = await fetch('/api/notifications');
+                    if (!response.ok) return;
+                    const data = await response.json();
+                    
+                    if (data.role === 'student') {
+                        data.orders.forEach(order => {
+                            const prevStatus = state.orders[order.order_number];
+                            if (prevStatus && prevStatus !== order.status) {
+                                showToast(
+                                    'Order Update!', 
+                                    `Your order <strong>${order.order_number}</strong> is now <strong>${order.status}</strong>.`, 
+                                    'fa-circle-check', 
+                                    'var(--success)'
+                                );
+                            }
+                            state.orders[order.order_number] = order.status;
+                        });
+                    } else if (data.role === 'admin') {
+                        if (state.pendingApprovals !== null && data.pending_approvals > state.pendingApprovals) {
+                            showToast(
+                                'Pending Registration', 
+                                'A new student self-registration request is pending approval!', 
+                                'fa-user-clock', 
+                                'var(--warning)'
+                            );
+                        }
+                        state.pendingApprovals = data.pending_approvals;
+                        
+                        data.active_orders.forEach(order => {
+                            if (!isFirstRun && !state.adminOrders[order.order_number]) {
+                                showToast(
+                                    'New Order Placed!', 
+                                    `A student placed a new order <strong>${order.order_number}</strong>.`, 
+                                    'fa-bowl-food', 
+                                    'var(--success)'
+                                );
+                            }
+                            state.adminOrders[order.order_number] = order.status;
+                        });
+                    }
+                    isFirstRun = false;
+                } catch (err) {
+                    console.error('Notification check failed:', err);
+                }
+            }
+
+            setInterval(checkNotifications, 4000);
+            setTimeout(checkNotifications, 1000);
+        })();
+        {% endif %}
+    </script>
+</body>
+</html>

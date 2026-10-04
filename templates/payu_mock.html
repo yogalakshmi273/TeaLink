@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayU Payment Gateway - Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --payu-green: #a4c639;
+            --payu-dark: #2c3e50;
+            --bg-primary: #f8fafc;
+            --text-color: #334155;
+            --border: #e2e8f0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .payment-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        
+        .payu-header {
+            background: var(--payu-dark);
+            padding: 1.5rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .payu-logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--payu-green);
+        }
+        
+        .merchant-info {
+            background: #f1f5f9;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .payment-amount {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        
+        .payment-body {
+            padding: 2rem 1.5rem;
+        }
+        
+        .tab-menu {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 0.8rem;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            font-family: inherit;
+        }
+        
+        .tab-btn.active {
+            color: var(--payu-dark);
+            border-bottom: 3px solid var(--payu-green);
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        input {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        input:focus {
+            border-color: var(--payu-dark);
+        }
+        
+        .btn-pay {
+            background: var(--payu-green);
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: none;
+            padding: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: opacity 0.2s;
+        }
+        
+        .btn-pay:hover {
+            opacity: 0.9;
+        }
+        
+        .simulation-banner {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            padding: 1rem;
+            border-radius: 8px;
+            color: #b45309;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="payment-box">
+    <div class="payu-header">
+        <div class="payu-logo">Pay<span style="color: white;">U</span></div>
+        <div style="font-size: 0.8rem; text-align: right;">
+            <p>Secure Checkout</p>
+            <p style="color: #94a3b8;">Txn Ref: {{ order_number }}</p>
+        </div>
+    </div>
+    
+    <div class="merchant-info">
+        <div>
+            <p style="color: #64748b; font-size: 0.8rem;">Merchant</p>
+            <strong style="color: var(--payu-dark); font-size: 1rem;">DBCY CAMPUS TEATIME Restaurant POS</strong>
+        </div>
+        <div style="text-align: right;">
+            <p style="color: #64748b; font-size: 0.8rem;">Amount</p>
+            <div class="payment-amount">₹{{ "%.2f"|format(total_price) }}</div>
+        </div>
+    </div>
+    
+    <div class="payment-body">
+        <div class="simulation-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i> <strong>Simulation Mode:</strong> This is a mock PayU portal integrated for the <strong>DBCY CAMPUS TEATIME</strong> college application. Choose a simulation scenario to proceed.
+        </div>
+        
+        <div class="tab-menu">
+            <button class="tab-btn active"><i class="fa-solid fa-credit-card"></i> Card Payment</button>
+            <button class="tab-btn"><i class="fa-solid fa-mobile-screen"></i> UPI</button>
+        </div>
+        
+        <form method="POST" action="{{ url_for('student_process_payment') }}">
+            <!-- Pass transaction metadata -->
+            <input type="hidden" name="order_number" value="{{ order_number }}">
+            <input type="hidden" name="delivery_time" value="{{ delivery_time }}">
+            <input type="hidden" name="student_notes" value="{{ student_notes }}">
+            
+            <div id="card-inputs">
+                <div class="form-group">
+                    <label>Cardholder Name</label>
+                    <input type="text" placeholder="John Doe" value="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Card Number</label>
+                    <input type="text" placeholder="4532 •••• •••• 8924" value="4532 9845 8294 8924" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="text" placeholder="MM/YY" value="12/29" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CVV</label>
+                        <input type="password" placeholder="•••" value="123" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label>Choose Simulation Outcome</label>
+                <select name="outcome" style="padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid var(--border); font-family: inherit; font-size: 1rem; outline: none;">
+                    <option value="success">Simulate Payment Success (Paid)</option>
+                    <option value="failure">Simulate Payment Failure</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-pay">
+                Pay ₹{{ "%.2f"|format(total_price) }} Securely
+            </button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

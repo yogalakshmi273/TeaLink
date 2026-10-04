@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Students{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+    <!-- Add Student Form -->
+    <div>
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem; color: var(--primary);"><i class="fa-solid fa-user-plus"></i> Add Student Account</h3>
+            <form method="POST" action="{{ url_for('admin_add_student') }}" autocomplete="off">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required placeholder="e.g. Arun Kumar" autocomplete="off">
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Roll Number / Username</label>
+                    <input type="text" id="username" name="username" required pattern="[Bb]\d{5}" maxlength="6" minlength="6" placeholder="e.g. B10001" title="Must start with B followed by 5 numbers (e.g. B10001)" autocomplete="off">
+                    <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 0.2rem;">Must start with B followed by 5 numbers (e.g. B10001)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Create Password</label>
+                    <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="new-password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="year">Course Level</label>
+                    <select id="year" name="year" required>
+                        <option value="" disabled selected>Select Level</option>
+                        <option value="UG">UG</option>
+                        <option value="PG">PG</option>
+                        <option value="PhD">PhD</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <select id="department" name="department" required>
+                        <option value="" disabled selected>Select Level First</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                    Create Account <i class="fa-solid fa-user-check"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Students Queue and Directory -->
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
+        
+        <!-- Registration Requests Queue -->
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem; color: var(--warning);"><i class="fa-solid fa-user-clock"></i> Pending Approvals ({{ pending_students|length }})</h3>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Selfie</th>
+                            <th>Details</th>
+                            <th>Username</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in pending_students %}
+                            <tr>
+                                <td>
+                                    {% if student.selfie_path %}
+                                        <img src="{{ url_for('static', filename=student.selfie_path.split('static/')[-1]) }}" alt="Selfie" style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 2px solid var(--warning);" onclick="window.open(this.src)">
+                                    {% else %}
+                                        <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                                            <i class="fa-solid fa-user"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ student.name }}</strong>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">{{ student.department }} | {{ student.year }}</div>
+                                </td>
+                                <td>{{ student.username }}</td>
+                                <td>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <form method="POST" action="{{ url_for('admin_approve_student', student_id=student.id, action='approve') }}">
+                                            <button type="submit" class="btn btn-success" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                                                <i class="fa-solid fa-check"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('admin_approve_student', student_id=student.id, action='reject') }}">
+                                            <button type="submit" class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                                                <i class="fa-solid fa-times"></i> Reject
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem 0;">
+                                    No pending registration approvals.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Approved Students Directory -->
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem; color: var(--success);"><i class="fa-solid fa-address-book"></i> Student Directory</h3>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Roll Number</th>
+                            <th>Department</th>
+                            <th>Year</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in approved_students %}
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.8rem;">
+                                        {% if student.selfie_path %}
+                                            <img src="{{ url_for('static', filename=student.selfie_path.split('static/')[-1]) }}" alt="Selfie" style="width: 35px; height: 35px; object-fit: cover; border-radius: 50%;">
+                                        {% else %}
+                                            <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                                                <i class="fa-solid fa-user" style="font-size: 0.8rem;"></i>
+                                            </div>
+                                        {% endif %}
+                                        <strong>{{ student.name }}</strong>
+                                    </div>
+                                </td>
+                                <td>{{ student.username }}</td>
+                                <td>{{ student.department }}</td>
+                                <td>{{ student.year }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('admin_delete_student', student_id=student.id) }}" onsubmit="return confirm('Are you sure you want to remove this student account?');">
+                                        <button type="submit" class="btn btn-danger" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" title="Delete Student">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem 0;">
+                                    No student accounts found.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dynamic Department options based on Course Level (UG vs PG/PhD)
+    const yearSelect = document.getElementById('year');
+    const deptSelect = document.getElementById('department');
+
+    const depts = {
+        'UG': [
+            'BCA',
+            'BSc.COMPUTER SCIENCE',
+            'B.COM',
+            'BSc.MATHEMATICS',
+            'BBA',
+            'BA.ENGLISH',
+            'BA.DEFENCE'
+        ],
+        'PG': [
+            'MSc.COMPUTER SCIENCE',
+            'MA.ENGLISH'
+        ],
+        'PhD': [
+            'PhD COMPUTER SCIENCE',
+            'PhD ENGLISH'
+        ]
+    };
+
+    yearSelect.addEventListener('change', function() {
+        const selectedLevel = this.value;
+        deptSelect.innerHTML = '';
+        
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = "";
+        placeholderOption.disabled = true;
+        placeholderOption.selected = true;
+        placeholderOption.textContent = "Select Dept";
+        deptSelect.appendChild(placeholderOption);
+
+        const list = depts[selectedLevel] || [];
+        list.forEach(dept => {
+            const opt = document.createElement('option');
+            opt.value = dept;
+            opt.textContent = dept;
+            deptSelect.appendChild(opt);
+        });
+    });
+</script>
+{% endblock %}

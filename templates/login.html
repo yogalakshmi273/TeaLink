@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}DBCY CAMPUS TEATIME - Login{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in" style="max-width: 500px; margin: 3rem auto; width: 100%;">
+    
+    <!-- Branding Header Card -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 72px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(245, 158, 11, 0.2)); border-radius: 50%; color: var(--accent); font-size: 2.2rem; margin-bottom: 1rem; border: 2px solid var(--glass-border); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);">
+            <i class="fa-solid fa-mug-hot"></i>
+        </div>
+        <h1 style="font-size: 2.2rem; background: linear-gradient(135deg, #818cf8, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.3rem;">
+            DBCY CAMPUS TEATIME
+        </h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">
+            Don Bosco College Yercaud • Campus Canteen & Teatime App
+        </p>
+    </div>
+
+    <!-- Main Glass Card Container -->
+    <div class="glass-card" style="padding: 2rem;">
+        
+        <!-- Role Quick Switcher Pills -->
+        <div style="display: flex; gap: 0.5rem; background: rgba(15, 23, 42, 0.6); padding: 0.3rem; border-radius: 9999px; margin-bottom: 2rem; border: 1px solid var(--glass-border);">
+            <button type="button" id="tab-student" onclick="switchLoginRole('student')" class="btn btn-primary" style="flex: 1; border-radius: 9999px; padding: 0.5rem; font-size: 0.9rem; transition: all 0.3s ease;">
+                <i class="fa-solid fa-graduation-cap"></i> Student Login
+            </button>
+            <button type="button" id="tab-admin" onclick="switchLoginRole('admin')" class="btn btn-secondary" style="flex: 1; border-radius: 9999px; padding: 0.5rem; font-size: 0.9rem; transition: all 0.3s ease;">
+                <i class="fa-solid fa-user-shield"></i> Admin Login
+            </button>
+        </div>
+
+        <form method="POST" action="{{ url_for('login') }}" id="login-form">
+            <div class="form-group">
+                <label for="username" id="username-label">
+                    <i class="fa-solid fa-id-card"></i> Student Roll Number
+                </label>
+                <input type="text" id="username" name="username" required placeholder="e.g. B10001">
+            </div>
+            
+            <div class="form-group">
+                <label for="password"><i class="fa-solid fa-lock"></i> Account Password</label>
+                <input type="password" id="password" name="password" required placeholder="••••••••">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.2rem; padding: 0.95rem; font-size: 1.05rem; font-weight: 700; border-radius: var(--radius-sm);">
+                Sign In to Teatime App <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </button>
+        </form>
+
+        <!-- 1-Click Quick Demo Test Buttons -->
+        <div style="margin-top: 2rem; border-top: 1px solid var(--glass-border); padding-top: 1.5rem;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 0.8rem; text-align: center;">
+                ⚡ 1-Click Quick Demo Sign In
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                <button type="button" onclick="quickFillLogin('admin', 'admin123', 'admin')" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.6rem; text-align: left; display: flex; justify-content: space-between; align-items: center; border-color: rgba(99, 102, 241, 0.4);">
+                    <span><i class="fa-solid fa-crown" style="color: #fbbf24;"></i> <strong>Admin Account</strong> (Full Control)</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">admin / admin123</span>
+                </button>
+
+            </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: var(--text-muted);">
+            Are you a DBCY student without an account? <a href="{{ url_for('register') }}" style="color: var(--primary); font-weight: 700;">Register here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function switchLoginRole(role) {
+        const tabStudent = document.getElementById('tab-student');
+        const tabAdmin = document.getElementById('tab-admin');
+        const usernameLabel = document.getElementById('username-label');
+        const usernameInput = document.getElementById('username');
+
+        if (role === 'admin') {
+            tabAdmin.className = 'btn btn-primary';
+            tabStudent.className = 'btn btn-secondary';
+            usernameLabel.innerHTML = '<i class="fa-solid fa-user-shield"></i> Admin Username';
+            usernameInput.placeholder = 'e.g. admin';
+        } else {
+            tabStudent.className = 'btn btn-primary';
+            tabAdmin.className = 'btn btn-secondary';
+            usernameLabel.innerHTML = '<i class="fa-solid fa-id-card"></i> Student Roll Number';
+            usernameInput.placeholder = 'e.g. B10001';
+        }
+    }
+
+    function quickFillLogin(user, pwd, role) {
+        switchLoginRole(role);
+        document.getElementById('username').value = user;
+        document.getElementById('password').value = pwd;
+        // Auto submit for ultimate convenience
+        document.getElementById('login-form').submit();
+    }
+</script>
+{% endblock %}

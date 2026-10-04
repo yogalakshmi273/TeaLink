@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Staff Order Queue</h1>
+            <p style="color: var(--text-muted);">Manage food prep, order hand-offs, and track sales performance</p>
+        </div>
+    </div>
+    
+    <!-- Quick Analytics/Reports for Staff -->
+    <div class="dashboard-grid" style="margin-bottom: 2rem;">
+        <div class="stat-card">
+            <div>
+                <label>Today's Sales</label>
+                <div class="stat-value">₹{{ "%.2f"|format(sales_today) }}</div>
+            </div>
+            <div style="color: var(--success); font-size: 0.9rem;">
+                <i class="fa-solid fa-calendar-day"></i> Count: {{ count_today }} orders completed
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div>
+                <label>Weekly Sales</label>
+                <div class="stat-value">₹{{ "%.2f"|format(sales_week) }}</div>
+            </div>
+            <div style="color: var(--accent); font-size: 0.9rem;">
+                <i class="fa-solid fa-calendar-week"></i> Count: {{ count_week }} orders completed
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Food preparation Queue -->
+    <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3><i class="fa-solid fa-fire-burner" style="color: var(--warning);"></i> Active Preparation Queue</h3>
+            <span class="badge badge-ordered">Auto-refreshing</span>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Student Name</th>
+                        <th>Items to Prepare</th>
+                        <th>Status</th>
+                        <th>Quick Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in active_orders %}
+                        <tr>
+                            <td>
+                                <strong>{{ order.order_number }}</strong>
+                                {% if order.delivery_time %}
+                                    <div style="font-size: 0.85rem; color: var(--warning); font-weight: 600; margin-top: 0.2rem;">
+                                        <i class="fa-solid fa-clock"></i> {{ order.delivery_time|time_12hr }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ order.student.name }}
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ order.student.department }} | {{ order.student.year }}</div>
+                            </td>
+                            <td>
+                                <ul style="list-style: none;">
+                                    {% for item in order.items %}
+                                        <li style="font-size: 1.05rem; padding: 0.2rem 0;">
+                                            <i class="fa-solid fa-circle-chevron-right" style="color: var(--primary); font-size: 0.8rem;"></i>
+                                            <strong>{{ item.quantity }}x</strong> {{ item.product_name }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ order.status.lower() }}">{{ order.status }}</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    {% if order.status == 'Ordered' %}
+                                        <form method="POST" action="{{ url_for('staff_update_status', order_id=order.id, status='Accepted') }}">
+                                            <button type="submit" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                                                Accept Order
+                                            </button>
+                                        </form>
+                                    {% elif order.status == 'Accepted' %}
+                                        <form method="POST" action="{{ url_for('staff_update_status', order_id=order.id, status='Preparing') }}">
+                                            <button type="submit" class="btn btn-warning" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                                                Start Preparing
+                                            </button>
+                                        </form>
+                                    {% elif order.status == 'Preparing' %}
+                                        <form method="POST" action="{{ url_for('staff_update_status', order_id=order.id, status='Ready') }}">
+                                            <button type="submit" class="btn btn-success" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                                                Mark as Ready
+                                            </button>
+                                        </form>
+                                    {% elif order.status == 'Ready' %}
+                                        <form method="POST" action="{{ url_for('staff_update_status', order_id=order.id, status='Completed') }}">
+                                            <button type="submit" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                                                Complete/Deliver
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 3rem 0;">
+                                <i class="fa-solid fa-mug-hot" style="font-size: 2.5rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+                                Prep queue is empty. Time to relax!
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Refresh page every 25 seconds to keep prep monitor updated
+    setTimeout(function(){
+       window.location.reload();
+    }, 25000);
+</script>
+{% endblock %}
