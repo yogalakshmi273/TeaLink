@@ -969,6 +969,11 @@ def api_notifications():
 # --- DATABASE INITIALIZATION ---
 with app.app_context():
     db.create_all()
+    @app.route('/setup-db')
+    def setup_db():
+    with app.app_context():
+        db.create_all()
+    return 'Database tables created successfully!'
 
 # --- RUN APPLICATION ---
 if __name__ == '__main__':
