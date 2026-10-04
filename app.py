@@ -401,10 +401,7 @@ def register():
                     flash('Invalid selfie image format.', 'error')
                     return redirect(url_for('register'))
 
-        # Selfie required
-        if not selfie_path:
-            flash('Please provide a selfie using Camera or Upload File.', 'error')
-            return redirect(url_for('register'))
+       
 
         # -----------------------------
         # Create Student
