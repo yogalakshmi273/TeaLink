@@ -978,6 +978,7 @@ def setup_db():
 def setup_admin():
     with app.app_context():
         admin = User.query.filter_by(username='admin').first()
+        
 
         if not admin:
             admin = User(
@@ -996,6 +997,22 @@ def setup_admin():
         db.session.commit()
 
     return 'Admin account created successfully!'
+@app.route('/check-students')
+def check_students():
+    with app.app_context():
+        students = User.query.filter_by(role='student').all()
+
+        result = []
+        for s in students:
+            result.append({
+                'username': s.username,
+                'name': s.name,
+                'status': s.status,
+                'department': s.department,
+                'year': s.year
+            })
+
+        return result
 
 # --- RUN APPLICATION ---
 if __name__ == '__main__':
