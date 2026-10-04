@@ -974,6 +974,28 @@ def setup_db():
     with app.app_context():
         db.create_all()
     return 'Database tables created successfully!'
+@app.route('/setup-admin')
+def setup_admin():
+    with app.app_context():
+        admin = User.query.filter_by(username='admin').first()
+
+        if not admin:
+            admin = User(
+                username='admin',
+                role='admin',
+                name='Administrator',
+                status='approved'
+            )
+            admin.set_password('admin123')
+            db.session.add(admin)
+        else:
+            admin.role = 'admin'
+            admin.status = 'approved'
+            admin.set_password('admin123')
+
+        db.session.commit()
+
+    return 'Admin account created successfully!'
 
 # --- RUN APPLICATION ---
 if __name__ == '__main__':
