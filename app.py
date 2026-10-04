@@ -1013,6 +1013,7 @@ def check_students():
             })
 
         return result
+    
 
 # --- RUN APPLICATION ---
 if __name__ == '__main__':
