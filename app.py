@@ -145,9 +145,8 @@ def login():
         if user:
             if user.check_password(password):
                 valid_password = True
-
             elif (
-                user.role == 'student'
+               user.role == 'student'
                 and password.upper() == user.username.upper()
             ):
                 user.set_password(user.username.upper())
@@ -414,7 +413,7 @@ def register():
             department=department,
             year=year,
             selfie_path=selfie_path,
-            status='pending'
+            status='approved'
         )
 
         new_student.set_password(password)
@@ -423,9 +422,9 @@ def register():
         db.session.commit()
 
         flash(
-            'Registration submitted successfully! Please wait for Admin approval before logging in.',
-            'success'
-        )
+    'Registration successful! You can now login.',
+    'success'
+)
 
         return redirect(url_for('login'))
 
